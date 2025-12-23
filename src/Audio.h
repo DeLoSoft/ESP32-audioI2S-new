@@ -146,6 +146,7 @@ class Audio {
     uint32_t         getInBufferSize(); // returns the size of the inputbuffer in bytes
     void             inBufferStatus(){InBuff.showStatus();}
     void             setTone(int8_t gainLowPass, int8_t gainBandPass, int8_t gainHighPass);
+    void             setPlayStartPercent(uint8_t percent);   // Startet Wiedergabe erst ab X% Bufferfüllung
     void             setI2SCommFMT_LSB(bool commFMT);
     int              getCodec() { return m_codec; }
     const char*      getCodecname() { return codecname[m_codec]; }
