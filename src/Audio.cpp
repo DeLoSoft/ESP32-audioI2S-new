@@ -4287,7 +4287,7 @@ void Audio::processWebStream() {
     // start audio decoding - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    if (!m_f_stream) {
     uint32_t currentFilled = InBuff.bufferFilled();
-    uint32_t bufferSize    = InBuff.getBufferSize();
+    uint32_t bufferSize    = InBuff.getBufsize();
 
     bool startNow = false;
 
