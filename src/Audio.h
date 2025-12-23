@@ -224,6 +224,7 @@ class Audio {
     void                     IIR_calculateCoefficients(int8_t G1, int8_t G2, int8_t G3);
     bool                     ts_parsePacket(uint8_t* packet, uint8_t* packetStart, uint8_t* packetLength);
     uint64_t                 getLastGranulePosition();
+    uint8_t                  m_playStartPercent = 0;   // 0 = aus, sonst 1-100
 
     //+++ create a T A S K  for playAudioData(), output via I2S +++
   public:
