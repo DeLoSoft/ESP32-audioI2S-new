@@ -4285,10 +4285,35 @@ void Audio::processWebStream() {
     }
 
     // start audio decoding - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    if (InBuff.bufferFilled() * 2 > m_pwst.maxFrameSize && !m_f_stream) { // waiting for buffer filled
-        info(*this, evt_info, "stream ready");
-        m_f_stream = true; // ready to play the audio data
+   if (!m_f_stream) {
+    uint32_t currentFilled = InBuff.bufferFilled();
+    uint32_t bufferSize    = InBuff.getBufferSize();
+
+    bool startNow = false;
+
+    // Wenn Prozent-Threshold gesetzt ist → nutzen
+    if (m_playStartPercent > 0 && bufferSize > 0) {
+        uint32_t desiredBytes = (bufferSize * m_playStartPercent) / 100;
+        if (currentFilled >= desiredBytes) {
+            startNow = true;
+        }
     }
+    // Fallback: Originalverhalten (sehr niedriger Threshold)
+    else {
+        if (currentFilled * 2 > m_pwst.maxFrameSize) {
+            startNow = true;
+        }
+    }
+
+    if (startNow) {
+        uint32_t percentFilled = bufferSize > 0 ? (currentFilled * 100 / bufferSize) : 0;
+        info(*this, evt_info, "stream ready – Buffer %lu%% gefüllt (%lu/%lu Bytes)",
+             (unsigned long)percentFilled,
+             (unsigned long)currentFilled,
+             (unsigned long)bufferSize);
+        m_f_stream = true; // Jetzt erst wirklich starten!
+    }
+}
 
     if (m_f_eof) {
         info(*this, evt_eof, "%s", m_lastHost.c_get());
@@ -6360,6 +6385,18 @@ void Audio::setTone(int8_t gainLowPass, int8_t gainBandPass, int8_t gainHighPass
           IIR_filterChain1(tmp, true ); // flush the filter
           IIR_filterChain2(tmp, true ); // flush the filter
         */
+}
+// —————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+void Audio::setPlayStartPercent(uint8_t percent) {
+    if (percent > 100) percent = 100;
+    m_playStartPercent = percent;
+
+    // Optional: Log-Ausgabe für Debug (kann später entfernt werden)
+    if (percent == 0) {
+        AUDIO_LOG_INFO("PlayStartPercent deaktiviert (Standardverhalten)");
+    } else {
+        AUDIO_LOG_INFO("PlayStartPercent auf %u%% gesetzt", (unsigned)percent);
+    }
 }
 // —————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 void Audio::forceMono(bool m) { // #100 mono option
